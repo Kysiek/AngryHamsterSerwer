@@ -4,11 +4,16 @@
 var Registration = require("../lib/registration");
 var mysqlDB = require('mysql');
 var should = require('should');
+var config = require('../../../config/config');
+var assert = require('assert');
 
 describe("Registration", function () {
-    var reg = {}, connection;
+    var reg = {},
+        connection,
+        username = "aajklafdgopaidfgn",
+        password = "pass";
     before(function(done){
-        connection = mysqlDB.createConnection({host: "localhost", user: "root", password: "", database: "AngryHamster"});
+        connection = mysqlDB.createConnection({host: config.DB_HOST, user: config.DB_USER, password: config.DB_PASSWORD, database: config.DB_NAME});
         connection.connect(function (err) {
             if(err) {
                 console.log("Error while connecting to the MySQL DB: " + err.stack);
@@ -27,12 +32,18 @@ describe("Registration", function () {
         var regResult;
         before(function(done) {
 
-            reg.applyForMembership({username: "kysiek", password: "passsss" }, function (err, result) {
+            reg.applyForMembership({username: username, password: password }, function (err, result) {
                 regResult = result;
                 console.log(regResult);
                 done();
             })
 
+        });
+        after(function(done) {
+            connection.query('DELETE FROM users WHERE username = ?', [username], function (err, rows) {
+                assert.ok(err === null, err);
+                done();
+            });
         });
         it("is successful", function () {
             regResult.success.should.equal(true);
@@ -91,13 +102,25 @@ describe("Registration", function () {
         var regResult;
         before(function(done) {
             reg.applyForMembership({
-                password: "asd",
-                username: "kysiek"
+                password: password,
+                username: username
             }, function(err, result) {
-                regResult = result;
-                done();
+                assert.ok(err === null, "There were problems with the inserting a user");
+                reg.applyForMembership({
+                    password: password,
+                    username: username
+                }, function(err, result) {
+                    regResult = result;
+                    done();
+                });
             });
 
+        });
+        after(function(done) {
+            connection.query('DELETE FROM users WHERE username = ?', [username], function (err, rows) {
+                assert.ok(err === null, err);
+                done();
+            });
         });
         it("is not successful", function () {
             regResult.success.should.equal(false);

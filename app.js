@@ -92,8 +92,10 @@ userRouter.route('/login')
         })(req, res, next);
     })
     .get(ensureAuthenticated, function(req, res){
-        res.json({ user: req.user, message: req.user});
+        res.json({ user: req.user});
     });
+
+
 
 userRouter.route('/logout')
     .get(ensureAuthenticated, function(req, res){

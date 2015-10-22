@@ -6,31 +6,42 @@ var mysqlDB = require("mysql");
 var assert = require("assert");
 var Authentication = require("../lib/authentication");
 var should = require("should");
+var config = require('../../../config/config');
 
 describe("Authentication", function () {
     var reg = {},
         auth = {},
-        connection;
+        connection,
+        username = "aajklafdgopaidfgn",
+        password = "pass";
     before(function(done){
-        connection = mysqlDB.createConnection({host: "localhost", user: "root", password: "", database: "AngryHamster"});
+        connection = mysqlDB.createConnection({host: config.DB_HOST, user: config.DB_USER, password: config.DB_PASSWORD, database: config.DB_NAME});
         connection.connect(function (err) {
             if(err) {
                 console.log("Error while connecting to the MySQL DB: " + err.stack);
-                return;
                 done();
             }
             auth = new Authentication(connection);
-            done();
+            reg = new Registration(connection);
+
+            reg.applyForMembership({username: username, password: password }, function (err, result) {
+                regResult = result;
+                console.log(regResult);
+                done();
+            });
         });
     });
     after(function (done) {
-        connection.end();
-        done();
+        connection.query('DELETE FROM users WHERE username = ?', [username], function (err, rows) {
+            assert.ok(err === null, err);
+            connection.end();
+            done();
+        });
     });
     describe("a valid login", function () {
         var authResult = {};
         before(function(done) {
-            auth.authenticate({username: "kysiek", password: "passsss"}, function (err, result) {
+            auth.authenticate({username: username, password: password}, function (err, result) {
                 assert.ok(err === null, err);
                 authResult = result;
                 console.log(authResult);
@@ -50,7 +61,7 @@ describe("Authentication", function () {
     describe("empty password", function () {
         var authResult = {};
         before(function(done) {
-            auth.authenticate({username: "698256044", password: ""}, function (err, result) {
+            auth.authenticate({username: username, password: ""}, function (err, result) {
                 assert.ok(err === null, err);
                 authResult = result;
                 done();
@@ -67,7 +78,7 @@ describe("Authentication", function () {
     describe("password does not match", function () {
         var authResult = {};
         before(function(done) {
-            auth.authenticate({username: "698256044", password: "acde"}, function (err, result) {
+            auth.authenticate({username: username, password: password + "asd"}, function (err, result) {
                 assert.ok(err === null, err);
                 authResult = result;
                 done();

@@ -5,12 +5,15 @@ var mysqlDB = require('mysql');
 var assert = require("assert");
 var Membership = require("../index");
 var should = require("should");
+var config = require('../../../config/config');
 
 describe("Main API", function () {
     var memb,
-        connection;
+        connection,
+        username = "aajklafdgopaidfgn",
+        password = "pass";
     before(function (done) {
-        connection = mysqlDB.createConnection({host: "localhost", user: "root", password: "", database: "AngryHamster"});
+        connection = mysqlDB.createConnection({host: config.DB_HOST, user: config.DB_USER, password: config.DB_PASSWORD, database: config.DB_NAME});
         connection.connect(function (err) {
             if(err) {
                 console.log("Error while connecting to the MySQL DB: " + err.stack);
@@ -21,12 +24,18 @@ describe("Main API", function () {
         });
     });
     after(function () {
-        connection.end();
+        after(function(done) {
+            connection.query('DELETE FROM users WHERE username = ?', [username], function (err, rows) {
+                assert.ok(err === null, err);
+                connection.end();
+                done();
+            });
+        });
     });
     describe("authentication", function () {
         var newUser = {};
         before(function (done) {
-            memb.register("kysiek_reg", "passsss", function (err, result) {
+            memb.register(username, password, function (err, result) {
                 newUser = result.user;
                 console.log(result.message);
                 assert.ok(result.success, "Can't register");
@@ -34,7 +43,7 @@ describe("Main API", function () {
             });
         });
         it("authenticates", function (done) {
-            memb.authenticate("kysiek_reg","passsss", function (err, result) {
+            memb.authenticate(username, password, function (err, result) {
                 result.success.should.be.equal(true);
                 done();
             });
