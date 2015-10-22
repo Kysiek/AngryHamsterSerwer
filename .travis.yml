@@ -3,6 +3,8 @@ node_js:
   - "4.1"
 before_install: npm install -g forever
 install: npm install
-before_script: npm install -g mocha
+before_script:
+  - mysql -u root < ./database/createDB.sql
+  - npm install -g mocha
 
   
