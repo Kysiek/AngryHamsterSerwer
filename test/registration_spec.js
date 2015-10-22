@@ -1,10 +1,10 @@
 /**
  * Created by Krzysztof on 2015-05-23.
  */
-var Registration = require("../lib/registration");
+var Registration = require("../services/membership/lib/registration");
 var mysqlDB = require('mysql');
 var should = require('should');
-var config = require('../../../config/config');
+var config = require('../config/config');
 var assert = require('assert');
 
 describe("Registration", function () {

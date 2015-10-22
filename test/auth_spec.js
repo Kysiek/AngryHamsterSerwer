@@ -1,12 +1,12 @@
 /**
  * Created by Krzysztof on 2015-05-24.
  */
-var Registration = require("../lib/registration");
+var Registration = require("../services/membership/lib/registration");
 var mysqlDB = require("mysql");
 var assert = require("assert");
-var Authentication = require("../lib/authentication");
+var Authentication = require("../services/membership/lib/authentication");
 var should = require("should");
-var config = require('../../../config/config');
+var config = require('../config/config');
 
 describe("Authentication", function () {
     var reg = {},

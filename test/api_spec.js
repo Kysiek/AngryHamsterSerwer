@@ -3,9 +3,9 @@
  */
 var mysqlDB = require('mysql');
 var assert = require("assert");
-var Membership = require("../index");
+var Membership = require("../services/membership/index");
 var should = require("should");
-var config = require('../../../config/config');
+var config = require('../config/config');
 
 describe("Main API", function () {
     var memb,

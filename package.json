@@ -19,5 +19,8 @@
     "bcrypt-nodejs": "0.0.3",
     "mocha": "*",
     "should": "*"
+  },
+  "scripts": {
+    "test": "mocha test"
   }
 }

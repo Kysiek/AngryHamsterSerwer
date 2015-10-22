@@ -2,7 +2,7 @@
  * Created by Krzysztof on 2015-05-23.
  */
 var should = require("should");
-var User = require("../models/user");
+var User = require("../model/user");
 
 describe("User", function(){
     describe("defaults", function(){
