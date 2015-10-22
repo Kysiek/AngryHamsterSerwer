@@ -2,6 +2,9 @@ addons:
   apt:
     packages:
     - sshpass
+addons:
+  ssh_known_hosts:
+  - 46.101.136.26
 language: node_js
 node_js:
 - '4.1'
