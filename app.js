@@ -1,6 +1,6 @@
 var express = require('express'),
     bodyParser = require('body-parser'),
-    Membership = require('./modules/membership/index'),
+    Membership = require('./services/membership/index'),
     cookieParser = require('cookie-parser'),
     session = require('express-session'),
     passport = require('passport'),
