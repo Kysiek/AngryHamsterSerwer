@@ -5,7 +5,7 @@ addons:
     packages:
     - sshpass
 language: node_js
-sudo: true
+sudo: false
 node_js:
 - '4.1'
 install: npm install
