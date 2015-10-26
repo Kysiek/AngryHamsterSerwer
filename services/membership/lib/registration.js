@@ -61,7 +61,7 @@ var Registration = function(dbConnection) {
         var user = new User(app);
         user.status = "approved";
         user.hashedPassword = bcrypt.hashSync(app.password);
-        var query = dbConnection.query('INSERT INTO users SET ?', user, function(err, result) {
+        dbConnection.query('INSERT INTO users SET ?', user, function(err, result) {
             assert.ok(err === null, err);
             dbConnection.query('SELECT * FROM users WHERE id = ?', [result.insertId], function (err, rows) {
                 assert.ok(err === null, err);
