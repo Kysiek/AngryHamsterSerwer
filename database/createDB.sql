@@ -157,14 +157,9 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `AngryHamsterDb`;
-INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (1, 'USD');
+INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (1, 'BitCoin');
 INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (2, 'EUR');
-INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (3, 'GBP');
-INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (4, 'PLN');
-INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (5, 'JPY');
-INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (6, 'RUB');
-INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (7, 'CNY');
-INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (8, 'BRL');
+INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (3, 'LiteCoin');
 
 COMMIT;
 
