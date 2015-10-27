@@ -75,9 +75,11 @@ userRouter.route('/register')
         console.log("There was a request to register");
         var bodyArgs = req.body;
         membership.register(bodyArgs.username, bodyArgs.password, function (err, result) {
-            result.code = result.code || 200;
-            delete result.user;
-            res.status(200).end();
+            if(result.success) {
+                res.status(200).end();
+            } else {
+                res.status(500).json({message: result.message});
+            }
         });
     });
 
