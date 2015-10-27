@@ -15,11 +15,11 @@ describe('Get wallet', function () {
         username = 'aajklafdgopaidfgn',
         password = 'pass',
         connection,
-        firstWalletCurrency = 'EUR',
+        firstWalletCurrency = 'BitCoin',
         firstWalletAmount = 245.56,
         firstWalletName = "sxcasdasd",
         firstWalletId, secondWalletId,
-        secondWalletCurrency = 'USD',
+        secondWalletCurrency = 'LiteCoin',
         secondWalletAmount = -45.09,
         secondWalletName = "sxc";
     before(function (done) {

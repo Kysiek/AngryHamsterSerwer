@@ -41,8 +41,8 @@ describe('Add wallet', function () {
     describe('correctly adds a wallet', function() {
         var addedWalletResult;
         var walletAmount = '567',
-            walletCurrency = 'EUR',
-            walletName = "Krysia1";
+            walletCurrency = 'LiteCoin',
+            walletName = "Krysiasdddd1";
 
         before(function(done) {
             addWallet.add({name: walletName, amount:walletAmount, currency:walletCurrency},
@@ -85,7 +85,7 @@ describe('Add wallet', function () {
     describe('an empty currency', function () {
         var addedWalletResult,
             walletAmount = '567',
-            walletName = "Krysia2";
+            walletName = "Krysia2333331123";
         before(function(done) {
             addWallet.add({name: walletName, amount: walletAmount},
                 validUser,
@@ -106,7 +106,7 @@ describe('Add wallet', function () {
         var addedWalletResult,
             walletAmount = '567',
             walletCurrency = 'xsd',
-            walletName = "Krysia3";
+            walletName = "Krysia123123";
         before(function(done) {
             addWallet.add({name: walletName, amount:walletAmount, currency: walletCurrency},
                 validUser,
@@ -125,8 +125,8 @@ describe('Add wallet', function () {
     });
     describe('an empty amount field', function () {
         var addedWalletResult,
-            walletCurrency = 'USD',
-            walletName = "Krysia4";
+            walletCurrency = 'LiteCoin',
+            walletName = "Krysia4ddsdsd";
         before(function(done) {
             addWallet.add({name: walletName, amount: undefined, currency: walletCurrency},
                 validUser,
@@ -152,7 +152,7 @@ describe('Add wallet', function () {
     describe('an empty name field', function () {
         var addedWalletResult,
             walletAmount = '123',
-            walletCurrency = 'USD';
+            walletCurrency = 'LiteCoin';
         before(function(done) {
             addWallet.add({amount: walletAmount, currency: walletCurrency},
                 validUser,
@@ -172,7 +172,7 @@ describe('Add wallet', function () {
     describe('an incorrect amount field', function () {
         var addedWalletResult,
             walletAmount = 'AlaMaKota',
-            walletCurrency = 'USD',
+            walletCurrency = 'LiteCoin',
             walletName = "Krysia6";
         before(function(done) {
             addWallet.add({name: walletName, amount: walletAmount, currency: walletCurrency},
@@ -194,13 +194,14 @@ describe('Add wallet', function () {
         var addedWalletFirstResult,
             addedWalletSecondResult,
             walletAmount = '23',
-            walletCurrency = 'USD',
-            walletName = "Krysia";
+            walletCurrency = 'LiteCoin',
+            walletName = "Krysia333333333333";
         before(function(done) {
             addWallet.add({name: walletName, amount: walletAmount, currency: walletCurrency},
                 validUser,
                 function(err, result) {
                     addedWalletFirstResult = result;
+                    console.log(addedWalletFirstResult)
                     addWallet.add({name: walletName, amount: walletAmount, currency: walletCurrency},
                         validUser,
                         function(err2, result2) {
