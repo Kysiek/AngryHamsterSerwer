@@ -36,7 +36,7 @@ describe("Registration", function () {
                 regResult = result;
                 console.log(regResult);
                 done();
-            })
+            });
 
         });
         after(function(done) {

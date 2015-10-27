@@ -1,6 +1,7 @@
 var express = require('express'),
     bodyParser = require('body-parser'),
     Membership = require('./services/membership/index'),
+    WalletManagement = require('./services/walletManagement/index');
     cookieParser = require('cookie-parser'),
     session = require('express-session'),
     passport = require('passport'),
@@ -12,6 +13,7 @@ var express = require('express'),
 
 app = express();
 var membership;
+var walletManagement;
 
 connection = mysql.createConnection({host: config.DB_HOST, user: config.DB_USER, password: config.DB_PASSWORD, database: config.DB_NAME}, function (err, result) {
     assert(err == null, "Could not connect to the Database");
@@ -21,10 +23,11 @@ connection.connect(function (err) {
     assert(err == null, "Could not connect to the Database");
     console.log("Connected successfully to the database");
     membership = new Membership(connection);
+    walletManagement = new WalletManagement(connection);
 });
 
 
-var port = process.env.PORT || 80;
+var port = process.env.PORT || 3000;
 
 passport.use(new LocalStrategy({
         usernameField: 'username',
@@ -65,6 +68,7 @@ app.use(passport.session());
 app.use(flash());
 
 var userRouter = express.Router();
+var walletManagementRouter = express.Router();
 
 userRouter.route('/register')
     .post(function (req, res) {
@@ -73,7 +77,7 @@ userRouter.route('/register')
         membership.register(bodyArgs.username, bodyArgs.password, function (err, result) {
             result.code = result.code || 200;
             delete result.user;
-            res.json(result);
+            res.status(200).end();
         });
     });
 
@@ -83,16 +87,15 @@ userRouter.route('/login')
         passport.authenticate('local', function(err, user, info) {
             if (err) { return next(err); }
             if (!user) {
-                var code = info.code || 200;
-                return res.json({success: false, message: info.message, code: code}); }
+                return res.status(500).json({message: info.message}); }
             req.logIn(user, function(err) {
                 if (err) { return next(err); }
-                return res.json({success: true, message: "Successfully logged", user: req.user, code: 200});
+                return res.status(200).end();
             });
         })(req, res, next);
     })
     .get(ensureAuthenticated, function(req, res){
-        res.json({ user: req.user});
+        res.status(200).json({user: req.user});
     });
 
 
@@ -100,14 +103,46 @@ userRouter.route('/login')
 userRouter.route('/logout')
     .get(ensureAuthenticated, function(req, res){
         req.logout();
-        res.status(200).json({success: true, message: "Successfully logout", code: 200})
+        res.status(200).end();
+    });
+
+walletManagementRouter.route('/')
+    .get(ensureAuthenticated, function(req, res){
+        walletManagement.getWallets(req.user, function(err, result) {
+            if(result.success) {
+                res.status(200).json(result.wallet);
+            } else {
+                res.status(500).json({message: "There were problems with getting wallets"});
+            }
+        });
+    })
+    .post(ensureAuthenticated, function(req, res) {
+        var bodyArgs = req.body;
+        walletManagement.addWallet(bodyArgs.name, bodyArgs.amount, bodyArgs.currency, req.user, function(err, result) {
+            if(result.success) {
+                res.status(200).end();
+            } else {
+                res.status(500).json({message: result.message});
+            }
+        });
+    });
+walletManagementRouter.route('/currency')
+    .get(ensureAuthenticated, function(req, res) {
+        walletManagement.getCurrencies(function(err, result) {
+            if(result.success) {
+                res.status(200).json(result.currencies);
+            } else {
+                res.status(500).json({message: result.message});
+            }
+        });
     });
 
 app.use('/user', userRouter);
+app.use('/wallet', walletManagementRouter);
 
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) { return next(); }
-    res.status(401).json({message: "You are not logged", code: 10008});
+    res.status(401).end();
 }
 
 app.listen(port, function () {

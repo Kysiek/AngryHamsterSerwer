@@ -84,6 +84,7 @@ DROP TABLE IF EXISTS `AngryHamsterDb`.`wallet` ;
 
 CREATE TABLE IF NOT EXISTS `AngryHamsterDb`.`wallet` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
   `userId` INT(11) NOT NULL,
   `currencyId` INT(11) NOT NULL,
   `amount` DOUBLE NULL,

@@ -7,9 +7,10 @@ var Wallet = function(args) {
     if(args.id) {
         wallet.id = args.id;
     }
-    wallet.currency = args.currency;
+    wallet.currencyId = args.currencyId;
     wallet.amount = args.amount;
     wallet.userId = args.userId;
+    wallet.name = args.name;
 
     return wallet;
 };
