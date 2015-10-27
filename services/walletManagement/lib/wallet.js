@@ -3,38 +3,45 @@
  */
 var Wallet = require("../../../model/Wallet");
 var Currency = require("../../../model/Currency");
+var Emitter = require("events").EventEmitter;
+var util = require("util");
+var assert = require('assert');
 
 
-var AddWalletResult = function (args) {
+var AddWalletResult = function (args, user) {
     return {
         args: args,
+        user: user,
         success: false,
         message: null,
         wallet: null
     }
 };
 
-var AddWallet = function (dbConnection, user) {
+var AddWallet = function (dbConnection) {
+    Emitter.call(this);
     var self = this;
     var continueWith = null;
-    events.EventEmitter.call(self);
+
 
 
     var validateArguments = function (addWalletResult) {
-        if(!addWalletResult.args.userId) {
-            addWalletResult.message = "userId field cannnot be empty";
+        if(!addWalletResult.user) {
+            addWalletResult.message = "user cannnot be empty";
             self.emit("invalid", addWalletResult);
-        } else if(!addWalletResult.args.amount) {
-            addWalletResult.message = "amount field cannnot be empty";
+        } else if(!addWalletResult.user.id) {
+            addWalletResult.message = "userId field cannnot be empty";
             self.emit("invalid", addWalletResult);
         } else if(!addWalletResult.args.currency) {
             addWalletResult.message = "currency field cannnot be empty";
             self.emit("invalid", addWalletResult);
-        } else if(!user) {
+        } else if(!addWalletResult.user) {
             addWalletResult.message = "User does not exist";
             self.emit("invalid", addWalletResult);
         } else {
-
+            if(!addWalletResult.args.amount) {
+                addWalletResult.args.amount = 0;
+            }
             self.emit("arguments-ok", addWalletResult);
         }
     };
@@ -42,10 +49,10 @@ var AddWallet = function (dbConnection, user) {
     var validateCorrectnessOfArgumentsAndCreateWalletObject = function (addWalletResult) {
         var amount = addWalletResult.args.amount;
         if(isNaN(addWalletResult.args.amount)) {
-            addWalletResult.message = "Currency is not a number";
+            addWalletResult.message = "Amount is not a number";
             self.emit("invalid", addWalletResult);
         } else {
-            addWalletResult.wallet = new Wallet({userId: user.id, amount: parseFloat(amount)});
+            addWalletResult.wallet = new Wallet({userId: addWalletResult.user.id, amount: parseFloat(amount)});
             self.emit("wallet-obj-created", addWalletResult);
         }
     };
@@ -54,10 +61,9 @@ var AddWallet = function (dbConnection, user) {
         dbConnection.query('SELECT * FROM currency WHERE currency = ?',
             [addWalletResult.args.currency],
             function (err, rows) {
-
                 assert.ok(err === null, err);
                 if(rows != undefined && rows.length !== 0) {
-                    addWalletResult.wallet.currency = rows[0].id;
+                    addWalletResult.wallet.currencyId = rows[0].id;
                     self.emit("currency-correct", addWalletResult);
                 }  else {
                     addWalletResult.message = "Currency does not exist";
@@ -69,25 +75,26 @@ var AddWallet = function (dbConnection, user) {
 
     var insertWalletToDb = function (addWalletResult) {
 
-        dbConnection.query('INSERT INTO wallet SET ?', user, function(err, result) {
+        dbConnection.query('INSERT INTO wallet SET ?', addWalletResult.wallet, function(err, result) {
             assert.ok(err === null, err);
             dbConnection.query('SELECT * FROM wallet WHERE id = ?', [result.insertId], function (err, rows) {
                 assert.ok(err === null, err);
                 addWalletResult.wallet = rows[0];
-                self.emit("wallet-inserted", app);
+                self.emit("wallet-inserted", addWalletResult);
             });
 
         });
     };
 
-    self.addWallet = function (args, next) {
+    self.addWallet = function (args, user, next) {
         continueWith = next;
-        var addWalletResult = new AddWalletResult(args);
+        var addWalletResult = new AddWalletResult(args, user);
         self.emit("add-wallet-request-received", addWalletResult);
     };
 
     var addWalletOk = function(addWalletResult) {
         addWalletResult.message = "Success!";
+        addWalletResult.success = true;
         self.emit("wallet-added", addWalletResult);
         if(continueWith) {
             continueWith(null, addWalletResult);
@@ -95,7 +102,6 @@ var AddWallet = function (dbConnection, user) {
     };
     var addWalletNotOk = function(addWalletResult) {
         addWalletResult.success = false;
-        addWalletResult.message = addWalletResult.message;
         self.emit("wallet-not-added", addWalletResult);
         if(continueWith) {
             continueWith(null, addWalletResult);
@@ -108,7 +114,9 @@ var AddWallet = function (dbConnection, user) {
     self.on("currency-correct", insertWalletToDb);
     self.on("wallet-inserted", addWalletOk);
 
-    self.on("invalid", registrationNotOk);
+    self.on("invalid", addWalletNotOk);
 
     return self;
 };
+util.inherits(AddWallet, Emitter);
+module.exports = AddWallet;
