@@ -116,36 +116,21 @@ CREATE TABLE IF NOT EXISTS `AngryHamsterDb`.`transactions` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `walletId` INT(11) NOT NULL,
   `toWalletId` INT(11) NULL DEFAULT NULL,
-  `exchangeRateId` INT(11) NOT NULL,
-  `originalAmount` DECIMAL(38,20) NULL,
-  `amount` DECIMAL(38,20) NULL DEFAULT NULL,
-  `transactionType` VARCHAR(20) NULL DEFAULT NULL,
-  `description` VARCHAR(50) NULL DEFAULT NULL,
-  `date` DATETIME NULL DEFAULT NULL,
+  `amountAfterTransaction` DOUBLE NOT NULL,
+  `amountAfterTransactionOnSecondWallet` DOUBLE NULL DEFAULT NULL,
+  `amount` DOUBLE NOT NULL,
+  `transactionType` VARCHAR(20) NOT NULL,
+  `transDate` DATETIME NOT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_Transactions_ExchangeRate1`
-    FOREIGN KEY (`exchangeRateId`)
-    REFERENCES `AngryHamsterDb`.`exchangerate` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
   CONSTRAINT `fk_Transactions_Pockets1`
     FOREIGN KEY (`walletId`)
     REFERENCES `AngryHamsterDb`.`wallet` (`id`)
     ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_fromWalet_walet`
-    FOREIGN KEY (`toWalletId`)
-    REFERENCES `AngryHamsterDb`.`wallet` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 CREATE INDEX `fk_Transactions_Pockets1_idx` ON `AngryHamsterDb`.`transactions` (`walletId` ASC);
-
-CREATE INDEX `fk_Transactions_ExchangeRate1_idx` ON `AngryHamsterDb`.`transactions` (`exchangeRateId` ASC);
-
-CREATE INDEX `fk_fromWalet_walet_idx` ON `AngryHamsterDb`.`transactions` (`toWalletId` ASC);
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
