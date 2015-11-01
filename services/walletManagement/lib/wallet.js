@@ -2,16 +2,16 @@
  * Created by KMACIAZE on 23.10.2015.
  */
 var Wallet = require("../../../model/Wallet");
-var Currency = require("../../../model/Currency");
 var Emitter = require("events").EventEmitter;
 var util = require("util");
 var assert = require('assert');
 
 
-var WalletResult = function (args, user) {
+var WalletResult = function (args, user, currency) {
     return {
         args: args,
         user: user,
+        currency: currency,
         success: false,
         message: null,
         wallet: null
@@ -169,19 +169,18 @@ var AddWallet = function (dbConnection) {
 
     self.on("get-invalid", getWalletNotOk);
 
+
     self.add = function (args, user, next) {
         continueWith = next;
         var addWalletResult = new WalletResult(args, user);
         self.emit("add-wallet-request-received", addWalletResult);
     };
 
-    self.get = function (user, next) {
+    self.getAll = function (user, next) {
         continueWith = next;
         var getWalletResult = new WalletResult(undefined, user);
         self.emit("get-wallet-request-received", getWalletResult);
     };
-
-
 
 
     return self;

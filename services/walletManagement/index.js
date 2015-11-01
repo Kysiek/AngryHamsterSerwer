@@ -5,6 +5,7 @@
 var events = require("events");
 var util = require("util");
 var Wallet = require("./lib/wallet");
+var WalletForCurrency = require("./lib/wallet_for_currency");
 var Currency = require("./lib/currency");
 var assert = require("assert");
 
@@ -35,7 +36,33 @@ var WalletManagement = function (connection) {
             self.emit("got-not-wallet", getWalletResult)
         });
 
-        wallet.get(user, next);
+        wallet.getAll(user, next);
+    };
+
+    self.getWalletsForCurrency = function(user, currencyName, next) {
+        var walletForCurrency = new WalletForCurrency(connection);
+
+        walletForCurrency.on("gawfc-ok", function (getWalletResult) {
+            self.emit("gawfc-ok", getWalletResult)
+        });
+        walletForCurrency.on("gawfc-not-ok", function (getWalletResult) {
+            self.emit("gawfc-not-ok", getWalletResult)
+        });
+
+        walletForCurrency.getAllForCurrency(user, currencyName, next);
+    };
+
+    self.getWalletForCurrencyForName = function(user, currencyName, walletName, next) {
+        var walletForCurrency = new WalletForCurrency(connection);
+
+        walletForCurrency.on("gwfc-ok", function (getWalletResult) {
+            self.emit("gwfc-ok", getWalletResult)
+        });
+        walletForCurrency.on("gwfc-not-ok", function (getWalletResult) {
+            self.emit("gwfc-not-ok", getWalletResult)
+        });
+
+        walletForCurrency.getWalletForNameAndForCurrency(user, currencyName, walletName, next);
     };
 
     self.getCurrencies = function (next) {

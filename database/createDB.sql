@@ -157,9 +157,25 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `AngryHamsterDb`;
-INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (1, 'BitCoin');
-INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (2, 'EUR');
-INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (3, 'LiteCoin');
+INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (1, 'Bitcoin');
+INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (2, 'Peercoin');
+INSERT INTO `AngryHamsterDb`.`currency` (`id`, `currency`) VALUES (3, 'Litecoin');
 
 COMMIT;
 
+-- -----------------------------------------------------
+-- Data for table `AngryHamsterDb`.`exchangerate`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `AngryHamsterDb`;
+INSERT INTO `AngryHamsterDb`.`exchangerate` (`id`, `fromCurrencyId`, `toCurrencyId`, `rate`) VALUES (1, 1, 1, 1.0);
+INSERT INTO `AngryHamsterDb`.`exchangerate` (`id`, `fromCurrencyId`, `toCurrencyId`, `rate`) VALUES (2, 1, 2, 837.67);
+INSERT INTO `AngryHamsterDb`.`exchangerate` (`id`, `fromCurrencyId`, `toCurrencyId`, `rate`) VALUES (3, 1, 3, 88.76);
+INSERT INTO `AngryHamsterDb`.`exchangerate` (`id`, `fromCurrencyId`, `toCurrencyId`, `rate`) VALUES (4, 2, 2, 1.0);
+INSERT INTO `AngryHamsterDb`.`exchangerate` (`id`, `fromCurrencyId`, `toCurrencyId`, `rate`) VALUES (5, 2, 1, 0.00119);
+INSERT INTO `AngryHamsterDb`.`exchangerate` (`id`, `fromCurrencyId`, `toCurrencyId`, `rate`) VALUES (6, 2, 3, 0.10596);
+INSERT INTO `AngryHamsterDb`.`exchangerate` (`id`, `fromCurrencyId`, `toCurrencyId`, `rate`) VALUES (7, 3, 3, 1.0);
+INSERT INTO `AngryHamsterDb`.`exchangerate` (`id`, `fromCurrencyId`, `toCurrencyId`, `rate`) VALUES (8, 3, 1, 0.01127);
+INSERT INTO `AngryHamsterDb`.`exchangerate` (`id`, `fromCurrencyId`, `toCurrencyId`, `rate`) VALUES (9, 3, 2, 9.44);
+
+COMMIT;

@@ -1,6 +1,8 @@
 /**
- * Created by KMACIAZE on 27.10.2015.
+ * Created by Kysiek on 01/11/15.
  */
+
+var WalletForCurrency = require('../services/walletManagement/lib/wallet_for_currency');
 var Wallet = require('../services/walletManagement/lib/wallet');
 var Membership = require('../services/membership/index');
 var mysqlDB = require('mysql');
@@ -9,19 +11,21 @@ var config = require('../config/config');
 var assert = require('assert');
 
 
-describe('Get wallet', function () {
+describe('Get wallet for currency', function () {
     var validUser,
         wallet,
+        walletForCurrency,
         username = 'aajklafdgopaidfgn',
         password = 'pass',
         connection,
         firstWalletCurrency = 'Bitcoin',
-        firstWalletAmount = 245.56,
-        firstWalletName = "sxcasdasd",
+        firstWalletAmount = 2.56,
+        firstWalletName = "Bitcoin wallet",
         firstWalletId, secondWalletId,
         secondWalletCurrency = 'Litecoin',
-        secondWalletAmount = -45.09,
-        secondWalletName = "sxc";
+        secondWalletAmount = 23.09,
+        secondWalletName = "Litecoin wallet",
+        currencyRequested = "Bitcoin";
     before(function (done) {
         connection = mysqlDB.createConnection({host: config.DB_HOST, user: config.DB_USER, password: config.DB_PASSWORD, database: config.DB_NAME});
         connection.connect(function(err) {
@@ -32,6 +36,7 @@ describe('Get wallet', function () {
             }
             var membership = new Membership(connection);
             wallet = new Wallet(connection);
+            walletForCurrency = new WalletForCurrency(connection);
             membership.register(username, password, function (err1, result1) {
                 validUser = result1.user;
                 wallet.add({name: firstWalletName, amount:firstWalletAmount, currency:firstWalletCurrency},
@@ -61,10 +66,10 @@ describe('Get wallet', function () {
             });
         });
     });
-    describe('getWallet request', function () {
+    describe('getWalletsForCurrency request', function () {
         var getWalletResults;
         before(function (done) {
-            wallet.getAll(validUser, function (err, result) {
+            walletForCurrency.getAllForCurrency(validUser, currencyRequested, function (err, result) {
                 assert.ok(err === null, err);
                 getWalletResults = result;
                 done();
@@ -91,12 +96,56 @@ describe('Get wallet', function () {
                 secondWalletFromDatabase = wallets[0];
                 firstWalletFromDatabase = wallets[1];
             }
-            firstWalletFromDatabase.amount.should.equal(firstWalletAmount);
-            firstWalletFromDatabase.currency.should.equal(firstWalletCurrency);
+            console.log(wallets[0]);
+            console.log(wallets[1]);
+            firstWalletFromDatabase.amount.should.be.defined;
+            firstWalletFromDatabase.initCurrency.should.equal(firstWalletCurrency);
+            firstWalletFromDatabase.amountInCurrency.should.equal(currencyRequested);
             firstWalletFromDatabase.name.should.equal(firstWalletName);
-            secondWalletFromDatabase.amount.should.equal(secondWalletAmount);
-            secondWalletFromDatabase.currency.should.equal(secondWalletCurrency);
+            secondWalletFromDatabase.amount.should.be.defined;
+            secondWalletFromDatabase.initCurrency.should.equal(secondWalletCurrency);
+            secondWalletFromDatabase.amountInCurrency.should.equal(currencyRequested);
             secondWalletFromDatabase.name.should.equal(secondWalletName);
+        });
+    });
+    describe('invalid currency', function () {
+        var getWalletResults;
+        before(function (done) {
+            walletForCurrency.getAllForCurrency(validUser, 'Bitcoinn', function (err, result) {
+                assert.ok(err === null, err);
+                getWalletResults = result;
+                done();
+            });
+        });
+        it('should not be successful', function () {
+            getWalletResults.success.should.equal(false);
+        });
+        it('should contain appropriate message', function () {
+            getWalletResults.message.should.equal('Invalid currency');
+        });
+    });
+    describe('getWalletForCurrencyAndForName request', function () {
+        var getWalletResults;
+        before(function (done) {
+            walletForCurrency.getWalletForNameAndForCurrency(validUser, currencyRequested, firstWalletName, function (err, result) {
+                assert.ok(err === null, err);
+                getWalletResults = result;
+                done();
+            });
+        });
+        it('should be successful', function () {
+            getWalletResults.success.should.equal(true);
+        });
+        it('should contain appropriate message', function () {
+            getWalletResults.message.should.equal('Success!');
+        });
+        it('should contain appropriate wallet', function () {
+            console.log(getWalletResults.wallet);
+            getWalletResults.wallet.amount.should.be.defined;
+            getWalletResults.wallet.initCurrency.should.equal(firstWalletCurrency);
+            getWalletResults.wallet.name.should.equal(firstWalletName);
+            getWalletResults.wallet.amountInCurrency.should.equal(currencyRequested);
+            getWalletResults.wallet.name.should.equal(firstWalletName);
         });
     });
 });

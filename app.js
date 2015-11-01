@@ -27,14 +27,14 @@ connection.connect(function (err) {
 });
 
 
-var port = process.env.PORT || 80;
+var port = process.env.PORT || 8080;
 
 passport.use(new LocalStrategy({
         usernameField: 'username',
         passwordField: 'password'
     },
     function(username, password, done) {
-        console.log("Szukanie u¿ytkownika: " + username + " " + password);
+        console.log("Szukanie uï¿½ytkownika: " + username + " " + password);
         membership.authenticate(username, password, function (err, authResult) {
             if(authResult.success) {
                 done(null, authResult.user);
@@ -69,6 +69,7 @@ app.use(flash());
 
 var userRouter = express.Router();
 var walletManagementRouter = express.Router();
+var defaultRouter = express.Router();
 
 userRouter.route('/register')
     .post(function (req, res) {
@@ -108,17 +109,8 @@ userRouter.route('/logout')
         res.status(200).end();
     });
 
-walletManagementRouter.route('/')
-    .get(ensureAuthenticated, function(req, res){
-        walletManagement.getWallets(req.user, function(err, result) {
-            if(result.success) {
-                res.status(200).json(result.wallet);
-            } else {
-                res.status(500).json({message: "There were problems with getting wallets"});
-            }
-        });
-    })
-    .post(ensureAuthenticated, function(req, res) {
+walletManagementRouter.route('').
+    post(ensureAuthenticated, function(req, res) {
         var bodyArgs = req.body;
         walletManagement.addWallet(bodyArgs.name, bodyArgs.amount, bodyArgs.currency, req.user, function(err, result) {
             if(result.success) {
@@ -128,7 +120,60 @@ walletManagementRouter.route('/')
             }
         });
     });
-walletManagementRouter.route('/currency')
+
+walletManagementRouter.route('/all')
+    .get(ensureAuthenticated, function(req, res){
+        walletManagement.getWallets(req.user, function(err, result) {
+            if(result.success) {
+                res.status(200).json(result.wallet);
+            } else {
+                res.status(500).json({message: "There were problems with getting wallets"});
+            }
+        });
+    });
+
+
+walletManagementRouter.route('/all/:currencyName')
+    .get(ensureAuthenticated, function(req, res){
+        walletManagement.getWalletsForCurrency(req.user, req.params.currencyName, function(err, result) {
+            if(result.success) {
+                res.status(200).json(result.wallet);
+            } else {
+                res.status(500).json({message: result.message});
+            }
+        });
+    });
+walletManagementRouter.route('/:walletName/:currencyName')
+    .get(ensureAuthenticated, function(req, res){
+        walletManagement.getWalletForCurrencyForName(req.user, req.params.currencyName, req.params.walletName,  function(err, result) {
+            if(result.success) {
+                res.status(200).json(result.wallet);
+            } else {
+                res.status(500).json({message: result.message});
+            }
+        });
+    });
+walletManagementRouter.route('/:walletName')
+    .get(ensureAuthenticated, function(req, res){
+        var walletName = req.params.walletName;
+        console.log(walletName);
+        walletManagement.getWallets(req.user, function(err, result) {
+            if(result.success) {
+                for(var i = 0, x = result.wallet.length; i < x; i++) {
+                    if(result.wallet[i].name == walletName) {
+                        res.status(200).json(result.wallet[i]);
+                        return;
+                    }
+                }
+                res.status(500).json({message: "Wallet with given name does not exist"});
+            } else {
+                res.status(500).json({message: "There were problems with getting wallets"});
+            }
+        });
+    });
+
+
+defaultRouter.route('/currency/all')
     .get(ensureAuthenticated, function(req, res) {
         walletManagement.getCurrencies(function(err, result) {
             if(result.success) {
@@ -139,8 +184,11 @@ walletManagementRouter.route('/currency')
         });
     });
 
+
+
 app.use('/user', userRouter);
 app.use('/wallet', walletManagementRouter);
+app.use('/',defaultRouter);
 
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) { return next(); }

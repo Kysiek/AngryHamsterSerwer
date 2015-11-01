@@ -13,6 +13,10 @@ env:
 language: node_js
 node_js:
 - '4.1'
+branches:
+  only:
+    - master
+
 install: npm install
 before_script:
 - mysql -u root < ./database/createDB.sql
