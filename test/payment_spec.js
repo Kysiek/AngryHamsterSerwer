@@ -60,7 +60,6 @@ describe('Payment', function () {
         before(function (done) {
             payment.make(validUser,{amount: amount, toWallet:validWallet.name},function(err, result) {
                 makeAPaymentResult = result;
-                console.log(makeAPaymentResult);
                 done();
             });
         });
@@ -83,6 +82,7 @@ describe('Payment', function () {
             makeAPaymentResult.payment.transactionType.should.equal(config.TRANSACTION_TYPE[config.PAYMENT_KEY]);
         });
         it('date should be defined', function () {
+            console.log(makeAPaymentResult.payment.transDate);
             makeAPaymentResult.payment.transDate.should.be.defined;
         });
         it('amount on wallet is bigger', function (done) {

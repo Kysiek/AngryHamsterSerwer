@@ -1,0 +1,63 @@
+/**
+ * Created by KMACIAZE on 02.11.2015.
+ */
+
+var events = require("events");
+var util = require("util");
+var Payment = require("./lib/payment");
+var Withdraw = require("./lib/withdraw");
+var Transfer = require("./lib/transfer");
+var TransactionHistory = require("./lib/history");
+var assert = require("assert");
+
+
+var Transactions = function(connection) {
+    var self = this;
+    events.EventEmitter.call(self);
+
+    self.makePayment = function(user, walletName, amount, next) {
+        var payment = new Payment(connection);
+        payment.on("payment-made", function (paymentResult) {
+            self.emit("payment-made", paymentResult)
+        });
+        payment.on("payment-not-made", function (paymentResult) {
+            self.emit("payment-not-made", paymentResult)
+        });
+        payment.make(user, { toWallet: walletName, amount: amount }, next)
+    };
+
+    self.makeWithdraw = function(user, walletName, amount, next) {
+        var withdraw = new Withdraw(connection);
+        withdraw.on("withdraw-made", function (withdrawResult) {
+            self.emit("withdraw-made", withdrawResult)
+        });
+        withdraw.on("withdraw-not-made", function (withdrawResult) {
+            self.emit("withdraw-not-made", withdrawResult)
+        });
+        withdraw.make(user, { fromWallet: walletName, amount: amount }, next)
+    };
+
+    self.makeTransfer = function(user, fromWalletName, walletToName, amount, next) {
+        var transfer = new Transfer(connection);
+        transfer.on("transfer-made", function (transferResult) {
+            self.emit("transfer-made", transferResult)
+        });
+        transfer.on("transfer-not-made", function (transferResult) {
+            self.emit("transfer-not-made", transferResult)
+        });
+        transfer.make(user, { fromWallet: fromWalletName, toWallet: walletToName, amount: amount }, next)
+    };
+
+    self.getHistory = function (user, next) {
+        var history = new TransactionHistory(connection);
+
+        history.on("get-history-ok", function (historyResult) {
+            self.emit("get-history-ok", historyResult)
+        });
+        history.get(user, next);
+    };
+
+};
+
+util.inherits(Transactions, events.EventEmitter);
+module.exports = Transactions;

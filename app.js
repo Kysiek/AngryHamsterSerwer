@@ -1,7 +1,8 @@
 var express = require('express'),
     bodyParser = require('body-parser'),
     Membership = require('./services/membership/index'),
-    WalletManagement = require('./services/walletManagement/index');
+    WalletManagement = require('./services/walletManagement/index'),
+    Transaction = require('./services/transaction/index'),
     cookieParser = require('cookie-parser'),
     session = require('express-session'),
     passport = require('passport'),
@@ -14,6 +15,7 @@ var express = require('express'),
 app = express();
 var membership;
 var walletManagement;
+var transaction;
 
 connection = mysql.createConnection({host: config.DB_HOST, user: config.DB_USER, password: config.DB_PASSWORD, database: config.DB_NAME}, function (err, result) {
     assert(err == null, "Could not connect to the Database");
@@ -24,10 +26,11 @@ connection.connect(function (err) {
     console.log("Connected successfully to the database");
     membership = new Membership(connection);
     walletManagement = new WalletManagement(connection);
+    transaction = new Transaction(connection);
 });
 
 
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 3000;
 
 passport.use(new LocalStrategy({
         usernameField: 'username',
@@ -70,6 +73,7 @@ app.use(flash());
 var userRouter = express.Router();
 var walletManagementRouter = express.Router();
 var defaultRouter = express.Router();
+var transactionRouter = express.Router();
 
 userRouter.route('/register')
     .post(function (req, res) {
@@ -183,12 +187,55 @@ defaultRouter.route('/currency/all')
             }
         });
     });
+transactionRouter.route('/all')
+    .get(ensureAuthenticated, function (req,res) {
+        transaction.getHistory(req.user, function (err, result) {
+            if(result.success) {
+                res.status(200).json(result.history);
+            } else {
+                res.status(500).json({message: result.message});
+            }
+        });
+    });
 
-
-
+transactionRouter.route('/payment')
+    .post(ensureAuthenticated, function (req,res) {
+        var bodyArgs = req.body;
+        console.log(bodyArgs.walletName);
+        transaction.makePayment(req.user, bodyArgs.walletName, bodyArgs.amount, function (err, result) {
+            if(result.success) {
+                res.status(200).end();
+            } else {
+                res.status(500).json({message: result.message});
+            }
+        });
+    });
+transactionRouter.route('/withdraw')
+    .post(ensureAuthenticated, function (req,res) {
+        var bodyArgs = req.body;
+        transaction.makeWithdraw(req.user, bodyArgs.walletName, bodyArgs.amount, function (err, result) {
+            if(result.success) {
+                res.status(200).end();
+            } else {
+                res.status(500).json({message: result.message});
+            }
+        });
+    });
+transactionRouter.route('/transfer')
+    .post(ensureAuthenticated, function (req,res) {
+        var bodyArgs = req.body;
+        transaction.makeTransfer(req.user, bodyArgs.walletFromName, bodyArgs.walletToName, bodyArgs.amount, function (err, result) {
+            if(result.success) {
+                res.status(200).end();
+            } else {
+                res.status(500).json({message: result.message});
+            }
+        });
+    });
 app.use('/user', userRouter);
 app.use('/wallet', walletManagementRouter);
 app.use('/',defaultRouter);
+app.use('/transactions',transactionRouter);
 
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) { return next(); }

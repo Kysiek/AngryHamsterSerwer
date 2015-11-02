@@ -37,8 +37,8 @@ var Withdraw = function(dbConnection) {
                 self.emit("withdraw-invalid", withdrawResult);
             } else {
                 withdrawResult.args.amount = parseFloat(withdrawResult.args.amount);
+                self.emit("arguments-ok", withdrawResult);
             }
-            self.emit("arguments-ok", withdrawResult);
         }
     };
 

@@ -36,8 +36,9 @@ var Payment = function (dbConnection) {
                 self.emit("payment-invalid", paymentResult);
             } else {
                 paymentResult.args.amount = parseFloat(paymentResult.args.amount);
+                self.emit("arguments-ok", paymentResult);
             }
-            self.emit("arguments-ok", paymentResult);
+
         }
     };
 
@@ -78,10 +79,8 @@ var Payment = function (dbConnection) {
     };
 
 
-
     var insertPaymentIntoDB = function (paymentResult) {
         dbConnection.query('INSERT INTO transactions SET ?', paymentResult.payment, function(err, result) {
-            console.log(err);
             assert.ok(err === null, err);
             dbConnection.query('SELECT * FROM transactions WHERE id = ?', [result.insertId], function (err, rows) {
                 assert.ok(err === null, err);
