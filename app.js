@@ -30,7 +30,7 @@ connection.connect(function (err) {
 });
 
 
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 80;
 
 passport.use(new LocalStrategy({
         usernameField: 'username',
