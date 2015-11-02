@@ -1,7 +1,7 @@
 /**
  * Created by KMACIAZE on 02.11.2015.
  */
-var Transaction = require("../../../model/Transaction");
+var Transaction = require("../../../model/transaction");
 var Emitter = require("events").EventEmitter;
 var util = require("util");
 var assert = require('assert');
