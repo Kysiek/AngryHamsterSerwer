@@ -26,7 +26,7 @@ var TransactionHistory = function (dbConnection) {
         if(transaction.transactionType == config.TRANSACTION_TYPE[config.PAYMENT_KEY]) {
             return {
                 type: 0,
-                wallet: transaction.walletId,
+                wallet: transaction.walletFrom,
                 amount: transaction.amount,
                 amountAfterOperation: transaction.amountAfterTransaction,
                 date: transaction.date
@@ -34,7 +34,7 @@ var TransactionHistory = function (dbConnection) {
         } else if(transaction.transactionType == config.TRANSACTION_TYPE[config.WITHDRAWAL_KEY]) {
             return {
                 type: 1,
-                wallet: transaction.walletId,
+                wallet: transaction.walletFrom,
                 amount: transaction.amount,
                 amountAfterOperation: transaction.amountAfterTransaction,
                 date: transaction.date
@@ -42,8 +42,8 @@ var TransactionHistory = function (dbConnection) {
         } else if(transaction.transactionType == config.TRANSACTION_TYPE[config.TRANSFER_KEY]) {
             return {
                 type: 2,
-                fromWallet: transaction.walletId,
-                toWallet: transaction.toWalletId,
+                fromWallet: transaction.walletFrom,
+                toWallet: transaction.walletTo,
                 amount: transaction.amount,
                 amountAfterOperationOnFirstWallet: transaction.amountAfterTransaction,
                 amountAfterOperationOnSecondWallet: transaction.amountAfterTransactionOnSecondWallet,
@@ -53,7 +53,7 @@ var TransactionHistory = function (dbConnection) {
     };
 
     var getTransactionHistoryFromDatabase = function (historyResult) {
-        dbConnection.query("SELECT walletId, toWalletId, amount, amountAfterTransaction, amountAfterTransactionOnSecondWallet, transactionType, STR_TO_DATE(transDate, '%H:%i %d.%m.%Y') FROM transactions WHERE walletId IN (SELECT id FROM wallet WHERE userId = ?)",
+        dbConnection.query("SELECT (SELECT name FROM wallet where id = walletId) AS walletFrom, (SELECT name FROM wallet where id = toWalletId) AS walletTo, amount, amountAfterTransaction, amountAfterTransactionOnSecondWallet, transactionType, DATE_FORMAT(transDate, '%H:%i %d.%m.%Y') AS date FROM transactions WHERE walletId IN (SELECT id FROM wallet WHERE userId = ?)",
             [historyResult.user.id],
             function (err, rows) {
                 assert.ok(err === null, err);
