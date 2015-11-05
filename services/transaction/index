@@ -48,13 +48,17 @@ var Transactions = function(connection) {
         transfer.make(user, { fromWallet: fromWalletName, toWallet: walletToName, amount: amount }, next)
     };
 
-    self.getHistory = function (user, next) {
+    self.getHistory = function (user, walletName, next) {
         var history = new TransactionHistory(connection);
 
         history.on("get-history-ok", function (historyResult) {
             self.emit("get-history-ok", historyResult)
         });
-        history.get(user, next);
+        history.on("get-not-history-ok", function (historyResult) {
+            self.emit("get-not-history-ok", historyResult)
+        });
+
+        history.get(user, walletName, next);
     };
 
 };

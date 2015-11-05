@@ -189,7 +189,17 @@ defaultRouter.route('/currency/all')
     });
 transactionRouter.route('/all')
     .get(ensureAuthenticated, function (req,res) {
-        transaction.getHistory(req.user, function (err, result) {
+        transaction.getHistory(req.user, undefined, function (err, result) {
+            if(result.success) {
+                res.status(200).json(result.history);
+            } else {
+                res.status(500).json({message: result.message});
+            }
+        });
+    });
+transactionRouter.route('/:walletName')
+    .get(ensureAuthenticated, function (req,res) {
+        transaction.getHistory(req.user, req.params.walletName, function (err, result) {
             if(result.success) {
                 res.status(200).json(result.history);
             } else {
